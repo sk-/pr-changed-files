@@ -1,0 +1,16 @@
+name: 'pr-modified-files'
+description: 'Github Action for getting the modified files of a Pull Request'
+author: 'Sebastian Kreft'
+branding:
+  icon: 'file-plus'
+  color: 'gray-dark'
+inputs:
+  token:
+    required: true
+    description: 'Github token to read the pull requests'
+outputs:
+  files:
+    description: 'List of changed files relative to the root'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

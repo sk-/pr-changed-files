@@ -1,0 +1,59 @@
+name: 'build-test'
+on: # rebuild any PRs and main branch changes
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+
+jobs:
+  build: # make sure build/ci work properly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+
+      - name: Cache node modules
+        id: cache-node
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nodemodules-
+
+      - name: Install Dependencies
+        if: steps.cache-node.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint:github
+
+      - name: Types
+        run: npm run types:check
+
+      - name: Format
+        run: npm run format:check
+
+      - name: Test
+        run: npm run test:ci
+
+      - name: Package
+        run: npm run package:ci
+
+      - name: Dist up to date?
+        run: if [ ! -z "$(git diff --name-only dist)" ]; then echo "Run npm run package"; git diff --name-only dist | cat; fi
+
+  test: # make sure the action works on a clean machine without building
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Test Action
+        id: changed-files
+        uses: ./
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: List Modified Files
+        run: 'ls -lh ${{ steps.changed-files.outputs.files }}'

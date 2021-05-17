@@ -1,0 +1,22 @@
+{
+  "plugins": ["@typescript-eslint", "github"],
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "plugin:github/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 9,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "camelcase": "off",
+    "no-console": "off",
+    "import/no-namespace": "off"
+  },
+  "env": {
+    "node": true,
+    "es6": true
+  }
+}
