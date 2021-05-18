@@ -37,10 +37,12 @@ test('valid files', async () => {
   expect(runAction(['a.js', 'b.txt', 'c.js'])).toEqual({
     status: 0,
     output: `::group::Modified Files
-a.js b.txt c.js
+a.js
+b.txt
+c.js
 ::endgroup::
 
-::set-output name=files::a.js\0b.txt\0c.js
+::set-output name=files::a.js%0Ab.txt%0Ac.js
 `,
   });
 });
