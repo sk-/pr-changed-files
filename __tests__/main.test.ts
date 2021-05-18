@@ -40,7 +40,7 @@ test('valid files', async () => {
 a.js b.txt c.js
 ::endgroup::
 
-::set-output name=files::a.js b.txt c.js
+::set-output name=files::a.js\0b.txt\0c.js
 `,
   });
 });

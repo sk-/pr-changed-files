@@ -17,7 +17,7 @@ function run(): void {
         `Files with spaces are not supported.\nOffending files: ${fileDetails}`
       );
     } else {
-      core.setOutput('files', files.join(' '));
+      core.setOutput('files', files.join('\0'));
     }
   } catch (error) {
     core.setFailed(error.message);
