@@ -44,7 +44,7 @@ jobs:
         run: npm run package:ci
 
       - name: Dist up to date?
-        run: if [ ! -z "$(git diff --name-only dist)" ]; then echo "Run npm run package"; git diff --name-only dist | cat; fi
+        run: if [ ! -z "$(git diff --name-only dist)" ]; then echo "Run npm run package"; git diff --name-only dist | cat; exit 1; fi
 
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
