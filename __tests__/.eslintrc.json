@@ -3,5 +3,8 @@
     "jest": true
   },
   "plugins": ["jest"],
-  "extends": ["plugin:jest/recommended", "plugin:jest/style"]
+  "extends": ["plugin:jest/recommended", "plugin:jest/style"],
+  "rules": {
+    "import/first": "off"
+  }
 }
