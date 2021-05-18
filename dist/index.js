@@ -41,7 +41,9 @@ function trackedFiles() {
 }
 exports.trackedFiles = trackedFiles;
 function changedFiles(ref1, ref2) {
+    cp.execFileSync('git', ['log']);
     cp.execFileSync('git', ['fetch', '--depth', '1', 'origin', ref1]);
+    cp.execFileSync('git', ['log']);
     const response = cp.execFileSync('git', [
         'diff',
         '--name-only',
