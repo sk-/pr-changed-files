@@ -6,4 +6,10 @@ updates:
     directory: '/'
     # Check the npm registry for updates every day (weekdays)
     schedule:
-      interval: 'daily'
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: '@types/node'
+        versions:
+          - '>12'
+        # We are stuck with Node12 in Github Actions
