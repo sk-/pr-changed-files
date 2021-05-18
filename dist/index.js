@@ -29,7 +29,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.files = void 0;
 const cp = __importStar(__nccwpck_require__(129));
 function files() {
-    const response = cp.execFileSync('git', ['ls-tree', 'HEAD', '-r', '--name-only']);
+    const response = cp.execFileSync('git', [
+        'ls-tree',
+        'HEAD',
+        '-r',
+        '--name-only',
+    ]);
     return response.toString().trim().split('\n');
 }
 exports.files = files;
@@ -172,6 +177,7 @@ function modifiedFiles() {
         core.info(`Processing PR # ${pr.pull_number}`);
         octokit.rest.pulls.listFiles(pr);
         const response = yield octokit.paginate(octokit.rest.pulls.listFiles, pr);
+        console.info(response);
         const files = response
             .filter((r) => r.status !== 'deleted')
             .map((r) => r.filename);

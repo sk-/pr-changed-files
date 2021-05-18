@@ -15,6 +15,7 @@ export async function modifiedFiles(): Promise<string[]> {
   core.info(`Processing PR # ${pr.pull_number}`);
   octokit.rest.pulls.listFiles(pr);
   const response = await octokit.paginate(octokit.rest.pulls.listFiles, pr);
+  console.info(response);
   const files = response
     .filter((r) => r.status !== 'deleted')
     .map((r) => r.filename);
