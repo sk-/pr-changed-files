@@ -177,9 +177,8 @@ function modifiedFiles() {
         core.info(`Processing PR # ${pr.pull_number}`);
         octokit.rest.pulls.listFiles(pr);
         const response = yield octokit.paginate(octokit.rest.pulls.listFiles, pr);
-        console.info(response);
         const files = response
-            .filter((r) => r.status !== 'deleted')
+            .filter((r) => r.status !== 'removed')
             .map((r) => r.filename);
         return files;
     });
