@@ -16,7 +16,7 @@ export async function modifiedFiles(): Promise<string[]> {
   octokit.rest.pulls.listFiles(pr);
   const response = await octokit.paginate(octokit.rest.pulls.listFiles, pr);
   const files = response
-    .filter((r) => r.status !== 'deleted')
+    .filter((r) => r.status !== 'removed')
     .map((r) => r.filename);
   return files;
 }
