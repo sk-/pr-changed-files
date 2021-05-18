@@ -7,8 +7,8 @@
   "scripts": {
     "build": "tsc",
     "types:check": "npm run build",
-    "format": "prettier --write **/*.ts **/*.js **/*.json **/*.yml",
-    "format:check": "prettier --check **/*.ts **/*.js **/*.json **/*.yml",
+    "format": "prettier --write **/*.ts **/*.js **/*.json **/*.yml **/*.md",
+    "format:check": "prettier --check **/*.ts **/*.js **/*.json **/*.yml **/*.md",
     "lint": "eslint '**/*.ts' '**/*.js' --max-warnings 0",
     "lint:github": "npm run lint -- --format=compact",
     "package": "npm run build && npm run package:ci",
