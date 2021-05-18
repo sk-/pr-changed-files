@@ -1,10 +1,9 @@
 import * as core from '@actions/core';
 import * as git from './git';
-import * as pr from './pr';
 
-async function run(): Promise<void> {
+function run(): void {
   try {
-    const files = await getFiles();
+    const files = git.getFiles();
     core.startGroup('Modified Files');
     core.info(files.join(' '));
     core.endGroup();
@@ -15,27 +14,13 @@ async function run(): Promise<void> {
         .sort()
         .join(' ');
       core.setFailed(
-        `Cannot work with files with spaces.\nOffending files: ${fileDetails}`
+        `Files with spaces are not supported.\nOffending files: ${fileDetails}`
       );
     } else {
       core.setOutput('files', files.join(' '));
     }
   } catch (error) {
     core.setFailed(error.message);
-  }
-}
-
-async function getFiles(): Promise<string[]> {
-  try {
-    return await pr.modifiedFiles();
-  } catch (error) {
-    // Trying below
-  }
-  try {
-    core.info('Not a Pull Request: getting all files');
-    return git.files();
-  } catch (error) {
-    throw error;
   }
 }
 

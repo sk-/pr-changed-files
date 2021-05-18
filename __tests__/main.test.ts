@@ -7,10 +7,10 @@ function runAction(results: string[] | Error): {
   output: string;
 } {
   const actionPath = path.join(__dirname, '..', 'lib', 'src', 'main.js');
-  const prPath = path.join(__dirname, '..', 'lib', 'src', 'pr.js');
+  const prPath = path.join(__dirname, '..', 'lib', 'src', 'git.js');
   const mockModified =
     results instanceof Error
-      ? `{ throw new Error("error")}`
+      ? `{ throw new Error("unexpected error")}`
       : JSON.stringify(results);
   try {
     const result = cp.execFileSync(
@@ -18,13 +18,13 @@ function runAction(results: string[] | Error): {
       [
         '-e',
         `
-        const pr = require("${prPath}");
-        pr.modifiedFiles = () => ${mockModified};
+        const git = require("${prPath}");
+        git.getFiles = () => ${mockModified};
         require("${actionPath}");
         `,
       ],
       {
-        env: process.env,
+        env: { ...process.env, GITHUB_REPOSITORY: 'owner/repo' },
       }
     );
     return { status: 0, output: result.toString() };
@@ -45,26 +45,9 @@ a.js b.txt c.js
   });
 });
 
-test('file with spaces', async () => {
-  expect(runAction(['a b.js', 'b c.txt', 'valid.js'])).toEqual({
-    status: 1,
-    output: `::group::Modified Files
-a b.js b c.txt valid.js
-::endgroup::
-::error::Cannot work with files with spaces.%0AOffending files: "a b.js" "b c.txt"
-`,
-  });
-});
-
-test('not a pr', async () => {
+test('error', async () => {
   expect(runAction(new Error('error'))).toEqual({
-    status: 0,
-    output: expect.stringMatching(`Not a Pull Request: getting all files
-::group::Modified Files
-.* action.yml .* package.json .*
-::endgroup::
-
-::set-output name=files::.* action.yml .* package.json .*
-`),
+    status: 1,
+    output: '::error::unexpected error\n',
   });
 });

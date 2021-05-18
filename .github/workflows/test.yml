@@ -53,7 +53,5 @@ jobs:
       - name: Test Action
         id: changed-files
         uses: ./
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: List Modified Files
         run: 'ls -lh ${{ steps.changed-files.outputs.files }}'
