@@ -40,10 +40,9 @@ function trackedFiles() {
     return response.toString().trim().split('\n').sort();
 }
 exports.trackedFiles = trackedFiles;
-function changedFiles(ref1, ref2) {
-    console.info(cp.execFileSync('git', ['log']).toString());
+function changedFiles(ref1) {
+    // We first need to fetch the base branch
     cp.execFileSync('git', ['fetch', '--depth', '1', 'origin', ref1]);
-    console.info(cp.execFileSync('git', ['log']).toString());
     const response = cp.execFileSync('git', [
         'diff',
         '--name-status',
@@ -61,7 +60,7 @@ function changedFiles(ref1, ref2) {
         var _a;
         const parts = l.split('\t');
         if (parts.length !== 2 && parts.length !== 3) {
-            console.error(`Unexpected diff entry: '${l}'`);
+            core.warning(`Unexpected diff entry: '${l}'`);
             return { status: '?', file: '' };
         }
         return {
@@ -76,17 +75,16 @@ function changedFiles(ref1, ref2) {
 }
 exports.changedFiles = changedFiles;
 function getFiles() {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c;
     const issue = github.context.issue;
     if (issue.number) {
         const base = (_c = (_b = (_a = github.context.payload) === null || _a === void 0 ? void 0 : _a.pull_request) === null || _b === void 0 ? void 0 : _b.base) === null || _c === void 0 ? void 0 : _c.ref;
-        const head = (_f = (_e = (_d = github.context.payload) === null || _d === void 0 ? void 0 : _d.pull_request) === null || _e === void 0 ? void 0 : _e.head) === null || _f === void 0 ? void 0 : _f.sha;
-        if (base && head) {
-            core.info(`PR info base=${base} head=${head}`);
-            return changedFiles(base, head);
+        if (base) {
+            core.info(`PR info base=${base}`);
+            return changedFiles(base);
         }
         else {
-            core.warning(`Missing PR info base=${base} head=${head}`);
+            core.warning(`Missing PR info base=${base}`);
         }
     }
     core.info('Not a Pull Request: getting all files');

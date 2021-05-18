@@ -12,10 +12,9 @@ export function trackedFiles(): string[] {
   return response.toString().trim().split('\n').sort();
 }
 
-export function changedFiles(ref1: string, ref2: string): string[] {
-  console.info(cp.execFileSync('git', ['log']).toString());
+export function changedFiles(ref1: string): string[] {
+  // We first need to fetch the base branch
   cp.execFileSync('git', ['fetch', '--depth', '1', 'origin', ref1]);
-  console.info(cp.execFileSync('git', ['log']).toString());
   const response = cp.execFileSync('git', [
     'diff',
     '--name-status',
@@ -32,7 +31,7 @@ export function changedFiles(ref1: string, ref2: string): string[] {
   const files = lines.map((l) => {
     const parts = l.split('\t');
     if (parts.length !== 2 && parts.length !== 3) {
-      console.error(`Unexpected diff entry: '${l}'`);
+      core.warning(`Unexpected diff entry: '${l}'`);
       return { status: '?', file: '' };
     }
     return {
@@ -50,12 +49,11 @@ export function getFiles(): string[] {
   const issue = github.context.issue;
   if (issue.number) {
     const base = github.context.payload?.pull_request?.base?.ref;
-    const head = github.context.payload?.pull_request?.head?.sha;
-    if (base && head) {
-      core.info(`PR info base=${base} head=${head}`);
-      return changedFiles(base, head);
+    if (base) {
+      core.info(`PR info base=${base}`);
+      return changedFiles(base);
     } else {
-      core.warning(`Missing PR info base=${base} head=${head}`);
+      core.warning(`Missing PR info base=${base}`);
     }
   }
   core.info('Not a Pull Request: getting all files');

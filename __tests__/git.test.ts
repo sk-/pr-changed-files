@@ -23,7 +23,6 @@ describe('getFiles', () => {
       pull_request: {
         number: 3141,
         base: { ref: 'main', sha: '0000' },
-        head: { ref: 'feature', sha: '1010' },
       },
     };
     mockExec.mockReturnValue(
