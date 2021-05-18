@@ -54,4 +54,4 @@ jobs:
         id: changed-files
         uses: ./
       - name: List Modified Files
-        run: echo ${{ steps.changed-files.outputs.files }} | xargs -0 ls -lh
+        run: echo ${{ steps.changed-files.outputs.files }} | xargs ls -lh
