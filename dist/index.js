@@ -26,18 +26,65 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.files = void 0;
+exports.getFiles = exports.changedFiles = exports.trackedFiles = void 0;
 const cp = __importStar(__nccwpck_require__(129));
-function files() {
+const core = __importStar(__nccwpck_require__(186));
+const github = __importStar(__nccwpck_require__(438));
+function trackedFiles() {
     const response = cp.execFileSync('git', [
         'ls-tree',
         'HEAD',
         '-r',
         '--name-only',
     ]);
-    return response.toString().trim().split('\n');
+    return response.toString().trim().split('\n').sort();
 }
-exports.files = files;
+exports.trackedFiles = trackedFiles;
+function changedFiles(ref1, ref2) {
+    const response = cp.execFileSync('git', ['diff', '--name-only', ref1, ref2]);
+    const lines = response.toString().trim().split('\n');
+    const status = {
+        MODIFIED: 'M',
+        ADDED: 'A',
+        RENAMED: 'R',
+        DELETED: 'D',
+    };
+    const files = lines.map((l) => {
+        var _a;
+        const parts = l.split('\t');
+        if (parts.length !== 2 && parts.length !== 3) {
+            console.error(`Unexpected diff entry: '${l}'`);
+            return { status: '?', file: '' };
+        }
+        return {
+            status: (_a = parts[0][0]) !== null && _a !== void 0 ? _a : '?',
+            file: parts[parts.length - 1],
+        };
+    });
+    return files
+        .filter((f) => f.file && f.status !== status.DELETED)
+        .map((f) => f.file)
+        .sort();
+}
+exports.changedFiles = changedFiles;
+function getFiles() {
+    var _a, _b, _c, _d, _e, _f;
+    const issue = github.context.issue;
+    if (issue.number) {
+        const base = (_c = (_b = (_a = github.context.payload) === null || _a === void 0 ? void 0 : _a.pull_request) === null || _b === void 0 ? void 0 : _b.base) === null || _c === void 0 ? void 0 : _c.ref;
+        const head = (_f = (_e = (_d = github.context.payload) === null || _d === void 0 ? void 0 : _d.pull_request) === null || _e === void 0 ? void 0 : _e.head) === null || _f === void 0 ? void 0 : _f.sha;
+        if (base && head) {
+            core.info(`PR info base=${base} head=${head}`);
+            return changedFiles(base, head);
+        }
+        else {
+            core.warning(`Missing PR info base=${base} head=${head}`);
+        }
+    }
+    core.info('Not a Pull Request: getting all files');
+    return trackedFiles();
+}
+exports.getFiles = getFiles;
 
 
 /***/ }),
@@ -66,124 +113,32 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 const git = __importStar(__nccwpck_require__(647));
-const pr = __importStar(__nccwpck_require__(832));
 function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const files = yield getFiles();
-            core.startGroup('Modified Files');
-            core.info(files.join(' '));
-            core.endGroup();
-            const filesWithSpaces = files.filter((f) => f.includes(' '));
-            if (filesWithSpaces.length > 0) {
-                const fileDetails = filesWithSpaces
-                    .map((f) => `"${f}"`)
-                    .sort()
-                    .join(' ');
-                core.setFailed(`Cannot work with files with spaces.\nOffending files: ${fileDetails}`);
-            }
-            else {
-                core.setOutput('files', files.join(' '));
-            }
+    try {
+        const files = git.getFiles();
+        core.startGroup('Modified Files');
+        core.info(files.join(' '));
+        core.endGroup();
+        const filesWithSpaces = files.filter((f) => f.includes(' '));
+        if (filesWithSpaces.length > 0) {
+            const fileDetails = filesWithSpaces
+                .map((f) => `"${f}"`)
+                .sort()
+                .join(' ');
+            core.setFailed(`Files with spaces are not supported.\nOffending files: ${fileDetails}`);
         }
-        catch (error) {
-            core.setFailed(error.message);
+        else {
+            core.setOutput('files', files.join(' '));
         }
-    });
-}
-function getFiles() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            return yield pr.modifiedFiles();
-        }
-        catch (error) {
-            // Trying below
-        }
-        try {
-            core.info('Not a Pull Request: getting all files');
-            return git.files();
-        }
-        catch (error) {
-            throw error;
-        }
-    });
+    }
+    catch (error) {
+        core.setFailed(error.message);
+    }
 }
 run();
-
-
-/***/ }),
-
-/***/ 832:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.modifiedFiles = void 0;
-const core = __importStar(__nccwpck_require__(186));
-const github = __importStar(__nccwpck_require__(438));
-function modifiedFiles() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const octokit = github.getOctokit(core.getInput('token'));
-        const issue = github.context.issue;
-        const pr = {
-            owner: issue.owner,
-            repo: issue.repo,
-            pull_number: issue.number,
-        };
-        if (pr.pull_number === undefined) {
-            throw new Error('Not in a Pull Request');
-        }
-        core.info(`Processing PR # ${pr.pull_number}`);
-        octokit.rest.pulls.listFiles(pr);
-        const response = yield octokit.paginate(octokit.rest.pulls.listFiles, pr);
-        const files = response
-            .filter((r) => r.status !== 'removed')
-            .map((r) => r.filename);
-        return files;
-    });
-}
-exports.modifiedFiles = modifiedFiles;
 
 
 /***/ }),
