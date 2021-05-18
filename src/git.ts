@@ -13,6 +13,13 @@ export function trackedFiles(): string[] {
 }
 
 export function changedFiles(ref1: string, ref2: string): string[] {
+  cp.execFileSync('git', [
+    'fetch',
+    '--depth',
+    '1',
+    'origin',
+    `${ref1}:${ref1}`,
+  ]);
   const response = cp.execFileSync('git', ['diff', '--name-only', ref1, ref2]);
   const lines = response.toString().trim().split('\n');
   const status = {
