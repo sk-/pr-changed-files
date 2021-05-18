@@ -5,20 +5,9 @@ function run(): void {
   try {
     const files = git.getFiles();
     core.startGroup('Modified Files');
-    core.info(files.join(' '));
+    core.info(files.join('\n'));
     core.endGroup();
-    const filesWithSpaces = files.filter((f) => f.includes(' '));
-    if (filesWithSpaces.length > 0) {
-      const fileDetails = filesWithSpaces
-        .map((f) => `"${f}"`)
-        .sort()
-        .join(' ');
-      core.setFailed(
-        `Files with spaces are not supported.\nOffending files: ${fileDetails}`
-      );
-    } else {
-      core.setOutput('files', files.join(' '));
-    }
+    core.setOutput('files', files.join('\n'));
   } catch (error) {
     core.setFailed(error.message);
   }

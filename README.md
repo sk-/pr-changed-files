@@ -19,5 +19,9 @@ steps:
     id: changed-files
     uses: sk-/pr-changed-files
   - name: List Modified Files
-    run: 'ls -lh ${{ steps.changed-files.outputs.files }}'
+    run: echo "${{ steps.changed-files.outputs.files }}" | xargs ls -lh
+  - name: List Modified Files with spaces
+    run:
+      echo "${{ steps.changed-files.outputs.files }}" | tr '\n' '\0' | xargs -0
+      ls -lh
 ```
