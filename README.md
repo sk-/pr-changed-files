@@ -1,6 +1,8 @@
 <p align="center">
   <a href="https://github.com/pr-changed-files/workflows"><img alt="pr-changed-files status" src="https://github.com/sk-/pr-changed-files/workflows/build-test/badge.svg"></a>
 </p>
+# ARCHIVED
+This was a good exercise, however, I ended up using [dorny/paths-filter](https://github.com/dorny/paths-filter).
 
 # Pr Changed Files Action
 
